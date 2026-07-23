@@ -1,22 +1,22 @@
-# SMA Tracker für Home Assistant
+# SMA Tracker for Home Assistant
 
-Ein Home Assistant Custom Component zum Tracken des Abstands zwischen dem aktuellen Kurs und dem Simple Moving Average (SMA) für verschiedene Aktienindizes und Wertpapiere. Die Daten stammen von Yahoo Finance.
+A Home Assistant custom component for tracking the distance between the current price and the Simple Moving Average (SMA) for various stock indices and securities. Data is sourced from Yahoo Finance.
 
 ## Features
 
-- **SMA-Berechnung**: Automatische Berechnung des Simple Moving Average für konfigurierbare Zeiträume (2-500 Handelstage)
-- **Abstandsanzeige**: Zeigt die prozentuale Differenz zwischen aktuellem Kurs und SMA
-- **Farbcodierung**: Intelligente Farbanzeige basierend auf dem Abstand:
-  - 🟢 **Grün**: > 2% über der SMA (deutlich über dem Durchschnitt)
-  - 🟡 **Gelb**: 0% bis < 2% über der SMA (nah an der SMA)
-  - 🔴 **Rot**: ≤ 0% (unter oder gleich der SMA)
-- **Yahoo Finance Integration**: Echte Marktdaten mit 2 Jahren Historien
-- **Flexible Updates**: Konfigurierbare Update-Intervalle (5-1440 Minuten)
-- **Multi-Index Support**: Unterstützt beliebige Yahoo Finance Symbole
+- **SMA Calculation**: Automatic calculation of Simple Moving Average for configurable periods (2-500 trading days)
+- **Distance Display**: Shows the percentage difference between current price and SMA
+- **Color Coding**: Intelligent color display based on distance:
+  - 🟢 **Green**: > 2% above SMA (well above average)
+  - 🟡 **Yellow**: 0% to < 2% above SMA (close to SMA)
+  - 🔴 **Red**: ≤ 0% (below or equal to SMA)
+- **Yahoo Finance Integration**: Real market data with 2 years of history
+- **Flexible Updates**: Configurable update intervals (5-1440 minutes)
+- **Multi-Index Support**: Supports any Yahoo Finance symbol
 
-## Unterstützte Symbole
+## Supported Symbols
 
-Beispiele für konfigurierbare Indizes und Wertpapiere:
+Examples of configurable indices and securities:
 
 - **DAX**: `^GDAXI`
 - **S&P 500**: `^GSPC`
@@ -24,93 +24,93 @@ Beispiele für konfigurierbare Indizes und Wertpapiere:
 - **Dow Jones**: `^DJI`
 - **Euro Stoxx 50**: `^STOXX50E`
 - **Nikkei 225**: `^N225`
-- **Einzelaktien**: z.B. `AAPL`, `MSFT`, `SIEMENS.DE`, etc.
+- **Individual Stocks**: e.g., `AAPL`, `MSFT`, `SIEMENS.DE`, etc.
 
-Weitere Symbole finden Sie auf [Yahoo Finance](https://finance.yahoo.com/).
+Find more symbols on [Yahoo Finance](https://finance.yahoo.com/).
 
 ## Installation
 
-### Via HACS (empfohlen)
+### Via HACS (recommended)
 
-1. Öffnen Sie Home Assistant
-2. Gehen Sie zu **HACS** → **Integrationen**
-3. Klicken Sie auf **+ Benutzerdefiniert durchsuchen** (oben rechts)
-4. Geben Sie die Repository-URL ein
-5. Wählen Sie **Integration** als Kategorie
-6. Klicken Sie auf **Installieren**
-7. Starten Sie Home Assistant neu
+1. Open Home Assistant
+2. Go to **HACS** → **Integrations**
+3. Click on **+ Explore & Download Repositories** (top right)
+4. Enter the repository URL
+5. Select **Integration** as the category
+6. Click **Download**
+7. Restart Home Assistant
 
-### Manuelle Installation
+### Manual Installation
 
-1. Laden Sie das Repository herunter
-2. Kopieren Sie den Ordner `sma_tracker` in Ihr `custom_components` Verzeichnis:
+1. Download the repository
+2. Copy the `sma_tracker` folder to your `custom_components` directory:
    ```
    ~/.homeassistant/custom_components/sma_tracker/
    ```
-3. Starten Sie Home Assistant neu
+3. Restart Home Assistant
 
-## Konfiguration
+## Configuration
 
-### Via UI (empfohlen)
+### Via UI (recommended)
 
-1. Gehen Sie zu **Einstellungen** → **Geräte und Dienste**
-2. Klicken Sie auf **Neue Integration erstellen**
-3. Suchen Sie nach **SMA Tracker**
-4. Füllen Sie die Konfigurationsfelder aus:
-   - **Yahoo Finance Symbol**: z.B. `^GDAXI` für den DAX
-   - **Anzeigename (optional)**: z.B. "DAX SMA200"
-   - **SMA-Zeitraum**: Anzahl der Handelstage für die SMA-Berechnung (default: 200)
-   - **Aktualisierungsintervall**: Wie oft die Daten aktualisiert werden in Minuten (default: 15)
+1. Go to **Settings** → **Devices & Services**
+2. Click **Create Integration**
+3. Search for **SMA Tracker**
+4. Fill in the configuration fields:
+   - **Yahoo Finance Symbol**: e.g., `^GDAXI` for DAX
+   - **Display Name (optional)**: e.g., "DAX SMA200"
+   - **SMA Period**: Number of trading days for SMA calculation (default: 200)
+   - **Update Interval**: How often to update data in minutes (default: 15)
 
-### Konfigurationsbeispiele
+### Configuration Examples
 
-**DAX mit SMA200 (alle 15 Minuten aktualisieren)**:
+**DAX with SMA200 (update every 15 minutes)**:
 - Symbol: `^GDAXI`
-- Anzeigename: `DAX`
-- SMA-Zeitraum: `200`
-- Aktualisierungsintervall: `15`
+- Display Name: `DAX`
+- SMA Period: `200`
+- Update Interval: `15`
 
-**S&P 500 mit SMA50 (täglich aktualisieren)**:
+**S&P 500 with SMA50 (update daily)**:
 - Symbol: `^GSPC`
-- Anzeigename: `S&P 500`
-- SMA-Zeitraum: `50`
-- Aktualisierungsintervall: `1440`
+- Display Name: `S&P 500`
+- SMA Period: `50`
+- Update Interval: `1440`
 
-## Entitäten
+## Entities
 
-Nach der Konfiguration erstellt die Integration folgende Entitäten:
+After configuration, the integration creates the following entities:
 
-### Sensor: `sensor.{name}_sma{period}_abstand`
+### Sensor: `sensor.{name}_sma{period}_distance`
 
-**Wert**: Prozentuale Differenz zwischen aktuellem Kurs und SMA
+**Value**: Percentage difference between current price and SMA
 
-**Attribute**:
-- `current_price`: Aktueller Kurs
-- `sma_value`: Aktueller SMA-Wert
-- `symbol`: Yahoo Finance Symbol
-- `sma_period`: Konfigurierter SMA-Zeitraum
-- `currency`: Währung des Indexes
+**Attributes**:
+- `current_price`: Current price
+- `sma_value`: Current SMA value
+- `symbol`: Yahoo Finance symbol
+- `sma_period`: Configured SMA period
+- `currency`: Currency of the index
 
-**Farben (RGB)**:
-- Grün: `(0, 255, 0)` für Werte > 2%
-- Gelb: `(255, 255, 0)` für Werte 0% bis < 2%
-- Rot: `(255, 0, 0)` für Werte ≤ 0%
+**Colors (RGB)**:
+- Green: `(0, 255, 0)` for values > 2%
+- Yellow: `(255, 255, 0)` for values 0% to < 2%
+- Red: `(255, 0, 0)` for values ≤ 0%
 
-## Automation Beispiele
+## Automation Examples
 
-### Benachrichtigung bei Unterschreitung der SMA
+### Notification When SMA is Breached
 
 ```yaml
 automation:
-  - alias: "DAX unterschreitet SMA"
+  - alias: "DAX breaches SMA"
     trigger:
       platform: numeric_state
-      entity_id: sensor.dax_sma200_abstand
+      entity_id: sensor.dax_sma200_distance
       below: 0
     action:
       service: notify.notify
       data:
-        message: "DAX ist unter die SMA200 gefallen!"
+        message: "DAX has fallen below the SMA200!"
 ```
 
 ### Lovelace Card
@@ -118,53 +118,53 @@ automation:
 ```yaml
 type: entities
 entities:
-  - entity: sensor.dax_sma200_abstand
-    name: DAX SMA200 Abstand
+  - entity: sensor.dax_sma200_distance
+    name: DAX SMA200 Distance
 ```
 
-## Fehlerbehebung
+## Troubleshooting
 
-### Fehler: "Not enough historical data"
+### Error: "Not enough historical data"
 
-Die Integration konnte nicht genug historische Daten von Yahoo Finance abrufen. Dies kann passieren, wenn:
-- Das Symbol nicht existiert
-- Yahoo Finance für dieses Symbol keine 2 Jahre Daten hat
+The integration couldn't retrieve enough historical data from Yahoo Finance. This can happen if:
+- The symbol doesn't exist
+- Yahoo Finance doesn't have 2 years of data for this symbol
 
-**Lösung**: Überprüfen Sie das Yahoo Finance Symbol und verringern Sie ggf. den SMA-Zeitraum.
+**Solution**: Check the Yahoo Finance symbol and consider reducing the SMA period.
 
-### Fehler: "HTTP 404"
+### Error: "HTTP 404"
 
-Das Symbol existiert nicht oder ist ungültig.
+The symbol doesn't exist or is invalid.
 
-**Lösung**: Überprüfen Sie das Symbol auf [Yahoo Finance](https://finance.yahoo.com/).
+**Solution**: Verify the symbol on [Yahoo Finance](https://finance.yahoo.com/).
 
-### Integration lädt nicht
+### Integration Not Loading
 
-- Überprüfen Sie die Logs in Home Assistant
-- Starten Sie Home Assistant neu
+- Check the logs in Home Assistant
+- Restart Home Assistant
 
-## Häufig Gestellte Fragen
+## Frequently Asked Questions
 
-**F: Warum nutzt ihr Yahoo Finance?**
-A: Yahoo Finance bietet kostenlose, zuverlässige Daten für Indizes und Einzelaktien ohne API-Key.
+**Q: Why do you use Yahoo Finance?**
+A: Yahoo Finance provides free, reliable data for indices and individual stocks without requiring an API key.
 
-**F: Kann ich mehrere Indizes gleichzeitig tracken?**
-A: Ja! Sie können mehrere Konfigurationseinträge erstellen, einen für jeden Index.
+**Q: Can I track multiple indices at the same time?**
+A: Yes! You can create multiple configuration entries, one for each index.
 
-**F: Wie genau ist die SMA-Berechnung?**
-A: Die SMA wird über die letzten 2 Jahre täglicher Daten berechnet. Die Genauigkeit ist sehr hoch.
+**Q: How accurate is the SMA calculation?**
+A: Very accurate - it's calculated using 2 years of daily data.
 
-**F: Kann ich den SMA-Zeitraum ändern?**
-A: Ja, aber Sie müssen einen neuen Konfigurationseintrag erstellen. Jede Kombination aus Symbol und SMA-Zeitraum ist eindeutig.
+**Q: Can I change the SMA period?**
+A: Yes, but you need to create a new configuration entry. Each combination of symbol and SMA period is unique.
 
-## Lizenz
+## License
 
-MIT License - Siehe LICENSE Datei für Details
+MIT License - See LICENSE file for details
 
 ## Support
 
-Für Probleme, Fragen oder Feature-Requests öffnen Sie bitte ein Issue auf GitHub.
+For issues, questions, or feature requests, please open an issue on GitHub.
 
 ---
 
-**Hinweis**: Diese Integration ist ein Community-Projekt und wird nicht von Home Assistant oder Yahoo Finance unterstützt.
+**Note**: This integration is a community project and is not supported by Home Assistant or Yahoo Finance.
