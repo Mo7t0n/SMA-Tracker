@@ -1,3 +1,5 @@
+![SMA Tracker](./icon.png)
+
 # SMA Tracker for Home Assistant
 
 A Home Assistant custom component for tracking the distance between the current price and the Simple Moving Average (SMA) for various stock indices and securities. Data is sourced from Yahoo Finance.
