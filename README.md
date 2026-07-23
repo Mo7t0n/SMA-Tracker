@@ -28,26 +28,15 @@ Examples of configurable indices and securities:
 
 Find more symbols on [Yahoo Finance](https://finance.yahoo.com/).
 
-## Installation
-
-### Via HACS (recommended)
+## Installation Via HACS
 
 1. Open Home Assistant
 2. Go to **HACS** → **Integrations**
-3. Click on **+ Explore & Download Repositories** (top right)
+3. Click on **3 dots** and **Custom Repositories** (top right)
 4. Enter the repository URL
 5. Select **Integration** as the category
 6. Click **Download**
 7. Restart Home Assistant
-
-### Manual Installation
-
-1. Download the repository
-2. Copy the `sma_tracker` folder to your `custom_components` directory:
-   ```
-   ~/.homeassistant/custom_components/sma_tracker/
-   ```
-3. Restart Home Assistant
 
 ## Configuration
 

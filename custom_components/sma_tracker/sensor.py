@@ -43,7 +43,7 @@ class SmaTrackerSensor(CoordinatorEntity[SmaTrackerCoordinator], SensorEntity):
         sma_period = entry.data[CONF_SMA_PERIOD]
         display_name = entry.data.get(CONF_NAME) or symbol
 
-        self._attr_name = f"{display_name} SMA{sma_period} Abstand"
+        self._attr_name = f"{display_name} SMA{sma_period} Distance"
         self._attr_unique_id = f"{DOMAIN}_{symbol}_{sma_period}"
 
     @property
@@ -94,11 +94,11 @@ class SmaTrackerSensor(CoordinatorEntity[SmaTrackerCoordinator], SensorEntity):
             return None
 
         if value <= 0:
-            # Red: unter oder gleich 0%
+            # Red: below or equal to 0%
             return (255, 0, 0)
         elif value < 2:
-            # Yellow: 0% bis 2%
+            # Yellow: 0% to 2%
             return (255, 255, 0)
         else:
-            # Green: über 2%
+            # Green: above 2%
             return (0, 255, 0)

@@ -1,5 +1,5 @@
 {
-  "name": "SMA Tracker (Yahoo Finance)",
+  "name": "SMA Tracker for Stock Indices (Yahoo Finance)",
   "content_in_root": false,
   "render_readme": true,
   "homeassistant": "2024.1.0"
