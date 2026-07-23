@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add SMA Tracker",
+        "description": "Track the percentage distance between the current price and a moving average for a Yahoo Finance symbol (e.g. ^GSPC for S&P 500, ^GDAXI for DAX, ^DJI for Dow Jones, ^IXIC for Nasdaq).",
+        "data": {
+          "symbol": "Yahoo Finance symbol",
+          "name": "Display name (optional)",
+          "sma_period": "SMA period (trading days)",
+          "scan_interval": "Update interval (minutes)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This symbol and SMA period is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SMA Tracker options",
+        "data": {
+          "scan_interval": "Update interval (minutes)"
+        }
+      }
+    }
+  }
+}
