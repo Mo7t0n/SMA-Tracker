@@ -1,0 +1,12 @@
+{
+  "domain": "sma_tracker",
+  "name": "SMA Tracker (Yahoo Finance)",
+  "codeowners": ["@yourusername"],
+  "config_flow": true,
+  "documentation": "https://github.com/yourusername/ha-sma-tracker",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/yourusername/ha-sma-tracker/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "SMA Tracker hinzufügen",
+        "description": "Verfolge den prozentualen Abstand zwischen aktuellem Kurs und gleitendem Durchschnitt (SMA) für ein Yahoo-Finance-Symbol (z. B. ^GSPC für S&P 500, ^GDAXI für DAX, ^DJI für Dow Jones, ^IXIC für Nasdaq).",
+        "data": {
+          "symbol": "Yahoo-Finance-Symbol",
+          "name": "Anzeigename (optional)",
+          "sma_period": "SMA-Zeitraum (Handelstage)",
+          "scan_interval": "Aktualisierungsintervall (Minuten)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Dieses Symbol mit diesem SMA-Zeitraum ist bereits konfiguriert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SMA Tracker Optionen",
+        "data": {
+          "scan_interval": "Aktualisierungsintervall (Minuten)"
+        }
+      }
+    }
+  }
+}
