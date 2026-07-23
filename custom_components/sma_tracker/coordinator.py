@@ -95,7 +95,7 @@ class SmaTrackerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             current_price = closes[-1]
 
         if sma_value == 0:
-            raise UpdateFailed(f"SMA value for '{self.symbol}' is 0, cannot compute distance")
+            raise UpdateFailed(f"SMA value for '{self.symbol}' is 0, cannot calculate distance")
 
         distance_pct = ((current_price - sma_value) / sma_value) * 100
 
