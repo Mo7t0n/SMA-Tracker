@@ -10,6 +10,7 @@ from homeassistant.helpers.event import async_track_time_change
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    CONF_NAME,
     CONF_NOTIFICATION_ENABLED,
     CONF_NOTIFICATION_SERVICE,
     CONF_NOTIFICATION_TIME,
@@ -103,7 +104,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     if not tracker.last_update_success or tracker.data is None:
                         continue
                     data = tracker.data
-                    title = tracker.hass.data.get(DOMAIN)
                     entry_title = entry.data.get(CONF_NAME) or data["symbol"]
                     lines.append(
                         f"{entry_title}: {data['distance_pct']} % | "
