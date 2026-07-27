@@ -1,6 +1,6 @@
-![SMA Tracker](./icon.png)
-
 # SMA Tracker for Home Assistant
+
+![SMA Tracker](./icon.png)
 
 A Home Assistant custom component for tracking the distance between the current price and the Simple Moving Average (SMA) for various stock indices and securities. Data is sourced from Yahoo Finance.
 
@@ -62,12 +62,14 @@ Find more symbols on [Yahoo Finance](https://finance.yahoo.com/).
 ### Configuration Examples
 
 **DAX with SMA200 (update every 15 minutes)**:
+
 - Symbol: `^GDAXI`
 - Display Name: `DAX`
 - SMA Period: `200`
 - Update Interval: `15`
 
 **S&P 500 with SMA50 (update daily)**:
+
 - Symbol: `^GSPC`
 - Display Name: `S&P 500`
 - SMA Period: `50`
@@ -82,6 +84,7 @@ After configuration, the integration creates the following entities:
 **Value**: Percentage difference between current price and SMA
 
 **Attributes**:
+
 - `current_price`: Current price
 - `sma_value`: Current SMA value
 - `symbol`: Yahoo Finance symbol
@@ -89,6 +92,7 @@ After configuration, the integration creates the following entities:
 - `currency`: Currency of the index
 
 **Colors (RGB)**:
+
 - Green: `(0, 255, 0)` for values > 2%
 - Yellow: `(255, 255, 0)` for values 0% to < 2%
 - Red: `(255, 0, 0)` for values ≤ 0%
@@ -128,6 +132,7 @@ entities:
 ### Error: "Not enough historical data"
 
 The integration couldn't retrieve enough historical data from Yahoo Finance. This can happen if:
+
 - The symbol doesn't exist
 - Yahoo Finance doesn't have 2 years of data for this symbol
 
