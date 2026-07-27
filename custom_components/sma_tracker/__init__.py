@@ -42,6 +42,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
+    if (
+        CONF_NOTIFICATION_ENABLED not in entry.options
+        and CONF_NOTIFICATION_ENABLED not in entry.data
+    ):
+        new_options = {
+            **entry.options,
+            CONF_NOTIFICATION_ENABLED: False,
+            CONF_NOTIFICATION_TIME: DEFAULT_NOTIFICATION_TIME,
+            CONF_NOTIFICATION_SERVICE: DEFAULT_NOTIFICATION_SERVICE,
+        }
+        hass.config_entries.async_update_entry(entry, options=new_options)
+
     notification_enabled = entry.options.get(
         CONF_NOTIFICATION_ENABLED,
         entry.data.get(CONF_NOTIFICATION_ENABLED, False),

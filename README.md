@@ -57,6 +57,8 @@ Find more symbols on [Yahoo Finance](https://finance.yahoo.com/).
    - **Notification Time**: Time for the daily notification (default: 22:00)
    - **Notification Service**: Home Assistant notify service, e.g. `notify.pushover`
 
+> Existing configuration entries are automatically updated with the new notification options. Notifications remain disabled by default and can be enabled later in the integration options.
+
 ### Configuration Examples
 
 **DAX with SMA200 (update every 15 minutes)**:
