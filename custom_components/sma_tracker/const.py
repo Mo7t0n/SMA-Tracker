@@ -6,9 +6,14 @@ CONF_SYMBOL = "symbol"
 CONF_NAME = "name"
 CONF_SMA_PERIOD = "sma_period"
 CONF_SCAN_INTERVAL = "scan_interval"
+CONF_NOTIFICATION_ENABLED = "notification_enabled"
+CONF_NOTIFICATION_TIME = "notification_time"
+CONF_NOTIFICATION_SERVICE = "notification_service"
 
 DEFAULT_SMA_PERIOD = 200
 DEFAULT_SCAN_INTERVAL = 60  # minutes
+DEFAULT_NOTIFICATION_TIME = "22:00"
+DEFAULT_NOTIFICATION_SERVICE = "notify.pushover"
 
 ATTR_CURRENT_PRICE = "current_price"
 ATTR_SMA_VALUE = "sma_value"

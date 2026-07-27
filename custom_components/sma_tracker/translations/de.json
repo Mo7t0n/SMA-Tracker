@@ -8,7 +8,10 @@
           "symbol": "Yahoo-Finance-Symbol",
           "name": "Anzeigename (optional)",
           "sma_period": "SMA-Zeitraum (Handelstage)",
-          "scan_interval": "Aktualisierungsintervall (Minuten)"
+          "scan_interval": "Aktualisierungsintervall (Minuten)",
+          "notification_enabled": "Tägliche Benachrichtigung aktivieren",
+          "notification_time": "Benachrichtigungszeit",
+          "notification_service": "Benachrichtigungsdienst"
         }
       }
     },
@@ -21,7 +24,10 @@
       "init": {
         "title": "SMA Tracker Optionen",
         "data": {
-          "scan_interval": "Aktualisierungsintervall (Minuten)"
+          "scan_interval": "Aktualisierungsintervall (Minuten)",
+          "notification_enabled": "Tägliche Benachrichtigung aktivieren",
+          "notification_time": "Benachrichtigungszeit",
+          "notification_service": "Benachrichtigungsdienst"
         }
       }
     }

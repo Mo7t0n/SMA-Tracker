@@ -14,6 +14,7 @@ A Home Assistant custom component for tracking the distance between the current 
   - 🔴 **Red**: ≤ 0% (below or equal to SMA)
 - **Yahoo Finance Integration**: Real market data with 2 years of history
 - **Flexible Updates**: Configurable update intervals (5-1440 minutes)
+- **Daily Notifications**: Optional daily stock-market notification at a configurable time (default: 22:00)
 - **Multi-Index Support**: Supports any Yahoo Finance symbol
 
 ## Supported Symbols
@@ -52,6 +53,9 @@ Find more symbols on [Yahoo Finance](https://finance.yahoo.com/).
    - **Display Name (optional)**: e.g., "DAX SMA200"
    - **SMA Period**: Number of trading days for SMA calculation (default: 200)
    - **Update Interval**: How often to update data in minutes (default: 15)
+   - **Daily Notification**: Enable a daily summary notification on trading days
+   - **Notification Time**: Time for the daily notification (default: 22:00)
+   - **Notification Service**: Home Assistant notify service, e.g. `notify.pushover`
 
 ### Configuration Examples
 
@@ -88,6 +92,10 @@ After configuration, the integration creates the following entities:
 - Red: `(255, 0, 0)` for values ≤ 0%
 
 ## Automation Examples
+
+### Daily Notification (optional)
+
+If you want a daily summary by notification service instead of automation, enable the daily notification option in the integration config. The integration will send a notification on trading days at the configured time.
 
 ### Notification When SMA is Breached
 
