@@ -1,7 +1,7 @@
 """Config flow for the SMA Tracker (Yahoo Finance) integration."""
 from __future__ import annotations
 
-from datetime import time
+from datetime import time as dt_time
 from typing import Any
 
 import voluptuous as vol

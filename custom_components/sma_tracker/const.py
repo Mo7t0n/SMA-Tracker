@@ -1,7 +1,5 @@
 """Constants for the SMA Tracker (Yahoo Finance) integration."""
 
-from datetime import time as dt_time
-
 DOMAIN = "sma_tracker"
 
 CONF_SYMBOL = "symbol"
@@ -14,7 +12,7 @@ CONF_NOTIFICATION_SERVICE = "notification_service"
 
 DEFAULT_SMA_PERIOD = 200
 DEFAULT_SCAN_INTERVAL = 60  # minutes
-DEFAULT_NOTIFICATION_TIME = dt_time(22, 0)
+DEFAULT_NOTIFICATION_TIME = "22:00"
 DEFAULT_NOTIFICATION_SERVICE = "notify.pushover"
 
 ATTR_CURRENT_PRICE = "current_price"
