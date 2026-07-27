@@ -45,7 +45,7 @@ class SmaTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
 
             notification_time = user_input.get(CONF_NOTIFICATION_TIME, DEFAULT_NOTIFICATION_TIME)
-            if isinstance(notification_time, time):
+            if isinstance(notification_time, dt_time):
                 notification_time = notification_time.strftime("%H:%M")
 
             return self.async_create_entry(
@@ -100,7 +100,7 @@ class SmaTrackerOptionsFlow(config_entries.OptionsFlow):
         """Handle the options flow."""
         if user_input is not None:
             notification_time = user_input.get(CONF_NOTIFICATION_TIME, DEFAULT_NOTIFICATION_TIME)
-            if isinstance(notification_time, time):
+            if isinstance(notification_time, dt_time):
                 notification_time = notification_time.strftime("%H:%M")
             user_input[CONF_NOTIFICATION_TIME] = notification_time
             return self.async_create_entry(title="", data=user_input)
