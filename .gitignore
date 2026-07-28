@@ -28,6 +28,7 @@ env/
 
 # Local Home Assistant dev instance
 config/
+custom_components/hacs/
 
 # IDE
 .vscode/
