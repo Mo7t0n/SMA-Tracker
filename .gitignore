@@ -21,9 +21,13 @@ wheels/
 *.egg
 
 # Virtual environments
+.venv/
 venv/
 ENV/
 env/
+
+# Local Home Assistant dev instance
+config/
 
 # IDE
 .vscode/
