@@ -1,16 +1,14 @@
 """Config flow for the SMA Tracker (Yahoo Finance) integration."""
 from __future__ import annotations
 
-from datetime import time as dt_time
 from typing import Any
 
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
 from homeassistant.config_entries import ConfigFlowResult
-from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.selector import TimeSelector
 
 from .const import (
     CONF_NAME,
@@ -45,8 +43,6 @@ class SmaTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
 
             notification_time = user_input.get(CONF_NOTIFICATION_TIME, DEFAULT_NOTIFICATION_TIME)
-            if isinstance(notification_time, dt_time):
-                notification_time = notification_time.strftime("%H:%M")
 
             return self.async_create_entry(
                 title=user_input.get(CONF_NAME) or symbol,
@@ -74,7 +70,9 @@ class SmaTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Coerce(int), vol.Range(min=5, max=1440)
                 ),
                 vol.Optional(CONF_NOTIFICATION_ENABLED, default=False): bool,
-                vol.Optional(CONF_NOTIFICATION_TIME, default=DEFAULT_NOTIFICATION_TIME): cv.time,
+                vol.Optional(
+                    CONF_NOTIFICATION_TIME, default=DEFAULT_NOTIFICATION_TIME
+                ): TimeSelector(),
                 vol.Optional(
                     CONF_NOTIFICATION_SERVICE,
                     default=DEFAULT_NOTIFICATION_SERVICE,
@@ -99,10 +97,6 @@ class SmaTrackerOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle the options flow."""
         if user_input is not None:
-            notification_time = user_input.get(CONF_NOTIFICATION_TIME, DEFAULT_NOTIFICATION_TIME)
-            if isinstance(notification_time, dt_time):
-                notification_time = notification_time.strftime("%H:%M")
-            user_input[CONF_NOTIFICATION_TIME] = notification_time
             return self.async_create_entry(title="", data=user_input)
 
         current_interval = self.config_entry.options.get(
@@ -137,7 +131,7 @@ class SmaTrackerOptionsFlow(config_entries.OptionsFlow):
                 vol.Optional(
                     CONF_NOTIFICATION_TIME,
                     default=current_notification_time,
-                ): cv.time,
+                ): TimeSelector(),
                 vol.Optional(
                     CONF_NOTIFICATION_SERVICE,
                     default=current_notification_service,

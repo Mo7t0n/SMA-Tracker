@@ -98,11 +98,13 @@ class SmaTrackerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             raise UpdateFailed(f"SMA value for '{self.symbol}' is 0, cannot calculate distance")
 
         distance_pct = ((current_price - sma_value) / sma_value) * 100
+        previous_close = closes[-2]
 
         return {
             "current_price": round(float(current_price), 4),
             "sma_value": round(float(sma_value), 4),
             "distance_pct": round(float(distance_pct), 2),
+            "previous_close": round(float(previous_close), 4),
             "currency": meta.get("currency"),
             "symbol": self.symbol,
         }
