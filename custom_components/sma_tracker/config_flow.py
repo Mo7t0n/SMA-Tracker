@@ -13,11 +13,13 @@ from homeassistant.helpers.selector import TimeSelector
 from .const import (
     CONF_NAME,
     CONF_NOTIFICATION_ENABLED,
+    CONF_NOTIFICATION_MINIMAL,
     CONF_NOTIFICATION_SERVICE,
     CONF_NOTIFICATION_TIME,
     CONF_SCAN_INTERVAL,
     CONF_SMA_PERIOD,
     CONF_SYMBOL,
+    DEFAULT_NOTIFICATION_MINIMAL,
     DEFAULT_NOTIFICATION_SERVICE,
     DEFAULT_NOTIFICATION_TIME,
     DEFAULT_SCAN_INTERVAL,
@@ -56,6 +58,9 @@ class SmaTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_NOTIFICATION_SERVICE: user_input.get(
                         CONF_NOTIFICATION_SERVICE, DEFAULT_NOTIFICATION_SERVICE
                     ).strip(),
+                    CONF_NOTIFICATION_MINIMAL: user_input.get(
+                        CONF_NOTIFICATION_MINIMAL, DEFAULT_NOTIFICATION_MINIMAL
+                    ),
                 },
             )
 
@@ -77,6 +82,9 @@ class SmaTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_NOTIFICATION_SERVICE,
                     default=DEFAULT_NOTIFICATION_SERVICE,
                 ): str,
+                vol.Optional(
+                    CONF_NOTIFICATION_MINIMAL, default=DEFAULT_NOTIFICATION_MINIMAL
+                ): bool,
             }
         )
 
@@ -97,8 +105,16 @@ class SmaTrackerOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle the options flow."""
         if user_input is not None:
+            symbol = self.config_entry.data[CONF_SYMBOL]
+            new_name = user_input.get(CONF_NAME, "").strip()
+            self.hass.config_entries.async_update_entry(
+                self.config_entry, title=new_name or symbol
+            )
             return self.async_create_entry(title="", data=user_input)
 
+        current_name = self.config_entry.options.get(
+            CONF_NAME, self.config_entry.data.get(CONF_NAME, "")
+        )
         current_interval = self.config_entry.options.get(
             CONF_SCAN_INTERVAL,
             self.config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
@@ -117,9 +133,16 @@ class SmaTrackerOptionsFlow(config_entries.OptionsFlow):
                 CONF_NOTIFICATION_SERVICE, DEFAULT_NOTIFICATION_SERVICE
             ),
         )
+        current_notification_minimal = self.config_entry.options.get(
+            CONF_NOTIFICATION_MINIMAL,
+            self.config_entry.data.get(
+                CONF_NOTIFICATION_MINIMAL, DEFAULT_NOTIFICATION_MINIMAL
+            ),
+        )
 
         options_schema = vol.Schema(
             {
+                vol.Optional(CONF_NAME, default=current_name): str,
                 vol.Required(
                     CONF_SCAN_INTERVAL,
                     default=current_interval,
@@ -136,6 +159,10 @@ class SmaTrackerOptionsFlow(config_entries.OptionsFlow):
                     CONF_NOTIFICATION_SERVICE,
                     default=current_notification_service,
                 ): str,
+                vol.Optional(
+                    CONF_NOTIFICATION_MINIMAL,
+                    default=current_notification_minimal,
+                ): bool,
             }
         )
 

@@ -11,7 +11,8 @@
           "scan_interval": "Aktualisierungsintervall (Minuten)",
           "notification_enabled": "Tägliche Benachrichtigung aktivieren",
           "notification_time": "Benachrichtigungszeit",
-          "notification_service": "Benachrichtigungsdienst"
+          "notification_service": "Benachrichtigungsdienst",
+          "notification_minimal": "Minimal-Benachrichtigung (Kurs und SMA-Wert ausblenden)"
         }
       }
     },
@@ -24,10 +25,12 @@
       "init": {
         "title": "SMA Tracker Optionen",
         "data": {
+          "name": "Anzeigename (optional)",
           "scan_interval": "Aktualisierungsintervall (Minuten)",
           "notification_enabled": "Tägliche Benachrichtigung aktivieren",
           "notification_time": "Benachrichtigungszeit",
-          "notification_service": "Benachrichtigungsdienst"
+          "notification_service": "Benachrichtigungsdienst",
+          "notification_minimal": "Minimal-Benachrichtigung (Kurs und SMA-Wert ausblenden)"
         }
       }
     }

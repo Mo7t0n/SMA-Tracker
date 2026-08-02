@@ -12,7 +12,7 @@ A Home Assistant custom component for tracking the distance between the current 
   - 🔴 **Red**: ≤ 0% (below or equal to SMA)
 - **Yahoo Finance Integration**: Real market data with 2 years of history
 - **Flexible Updates**: Configurable update intervals (5-1440 minutes)
-- **Daily Notifications**: Optional daily stock-market notification at a configurable time (default: 22:00)
+- **Daily Notifications**: One combined, richly formatted notification per configured time/service, covering all trackers due at that time — not one message per tracker
 - **Multi-Index Support**: Supports any Yahoo Finance symbol
 
 ## Supported Symbols
@@ -54,8 +54,11 @@ Find more symbols on [Yahoo Finance](https://finance.yahoo.com/).
    - **Daily Notification**: Enable a daily summary notification on trading days
    - **Notification Time**: Time for the daily notification (default: 22:00)
    - **Notification Service**: Home Assistant notify service, e.g. `notify.pushover`
+   - **Minimal Notification**: Only show the name, percentage and trend arrow — hides the price/SMA detail lines
 
 > Existing configuration entries are automatically updated with the new notification options. Notifications remain disabled by default and can be enabled later in the integration options.
+>
+> All of the above — including the display name — can be changed later via **Settings → Devices & Services → SMA Tracker → Configure** on the individual entry.
 
 ### Configuration Examples
 
@@ -99,7 +102,28 @@ After configuration, the integration creates the following entities:
 
 ### Daily Notification (optional)
 
-If you want a daily summary by notification service instead of automation, enable the daily notification option in the integration config. The integration will send a notification on trading days at the configured time.
+If you want a daily summary by notification service instead of automation, enable the daily notification option in the integration config. The integration sends the notification on trading days at the configured time.
+
+If several trackers share the same notification time and service, they are combined into a **single** message instead of one notification per tracker. Example (as rendered by Pushover, which supports basic HTML):
+
+```text
+🟩 DAX: ↑ +2.34 %
+    Kurs: 18420.10 EUR
+    SMA200: 18004.55 EUR
+
+🟥 S&P 500: ↓ -0.85 %
+    Kurs: 5320.12 USD
+    SMA200: 5365.90 USD
+```
+
+- 🟥/🟨/🟩 mark the same red/yellow/green thresholds as the sensor color coding
+- The trend arrow (↑/↓/→) compares the current price to the previous trading day's close
+- Name, percentage and arrow are sent in **bold**, with the percentage/arrow colored to match the status square
+- **Minimal Notification** (see above) drops the `Kurs`/`SMA` lines and keeps just the first line
+
+> The bold/color formatting relies on Pushover's HTML support (`data: {html: true}`, sent automatically). Other notify services typically ignore the `html` field; if they don't render HTML, the `<b>`/`<font>` tags may show up as literal text.
+
+Notifications are skipped on Saturday and Sunday, since markets are closed. To test the notification flow on a weekend, flip `_DEBUG_IGNORE_WEEKEND` to `True` near the top of `__init__.py` — this is a code-only debug switch, not a UI option, and should not be left enabled.
 
 ### Notification When SMA is Breached
 

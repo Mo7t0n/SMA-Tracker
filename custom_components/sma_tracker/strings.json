@@ -11,7 +11,8 @@
           "scan_interval": "Update interval (minutes)",
           "notification_enabled": "Enable daily notification",
           "notification_time": "Notification time",
-          "notification_service": "Notification service"
+          "notification_service": "Notification service",
+          "notification_minimal": "Minimal notification (hide price and SMA value)"
         }
       }
     },
@@ -24,10 +25,12 @@
       "init": {
         "title": "SMA Tracker options",
         "data": {
+          "name": "Display name (optional)",
           "scan_interval": "Update interval (minutes)",
           "notification_enabled": "Enable daily notification",
           "notification_time": "Notification time",
-          "notification_service": "Notification service"
+          "notification_service": "Notification service",
+          "notification_minimal": "Minimal notification (hide price and SMA value)"
         }
       }
     }

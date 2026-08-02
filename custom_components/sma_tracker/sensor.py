@@ -41,7 +41,7 @@ class SmaTrackerSensor(CoordinatorEntity[SmaTrackerCoordinator], SensorEntity):
         self._entry = entry
         symbol = entry.data[CONF_SYMBOL]
         sma_period = entry.data[CONF_SMA_PERIOD]
-        display_name = entry.data.get(CONF_NAME) or symbol
+        display_name = entry.options.get(CONF_NAME, entry.data.get(CONF_NAME)) or symbol
 
         self._attr_name = f"{display_name} SMA{sma_period} Distance"
         self._attr_unique_id = f"{DOMAIN}_{symbol}_{sma_period}"

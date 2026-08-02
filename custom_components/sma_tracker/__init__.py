@@ -13,11 +13,13 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CONF_NAME,
     CONF_NOTIFICATION_ENABLED,
+    CONF_NOTIFICATION_MINIMAL,
     CONF_NOTIFICATION_SERVICE,
     CONF_NOTIFICATION_TIME,
     CONF_SCAN_INTERVAL,
     CONF_SMA_PERIOD,
     CONF_SYMBOL,
+    DEFAULT_NOTIFICATION_MINIMAL,
     DEFAULT_NOTIFICATION_SERVICE,
     DEFAULT_NOTIFICATION_TIME,
     DEFAULT_SCAN_INTERVAL,
@@ -29,10 +31,17 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = ["sensor"]
 
-# Emoji thresholds mirror SmaTrackerSensor.rgb_color in sensor.py.
-_STATUS_EMOJI_RED = "\U0001F534"
-_STATUS_EMOJI_YELLOW = "\U0001F7E1"
-_STATUS_EMOJI_GREEN = "\U0001F7E2"
+# Debug switch: set to True locally to bypass the weekend skip below and
+# test the notification flow immediately. Never commit this as True.
+_DEBUG_IGNORE_WEEKEND = False
+
+# Emoji/color thresholds mirror SmaTrackerSensor.rgb_color in sensor.py.
+_STATUS_EMOJI_RED = "\U0001F7E5"
+_STATUS_EMOJI_YELLOW = "\U0001F7E8"
+_STATUS_EMOJI_GREEN = "\U0001F7E9"
+_STATUS_COLOR_RED = "#FF0000"
+_STATUS_COLOR_YELLOW = "#FFFF00"
+_STATUS_COLOR_GREEN = "#00FF00"
 
 _TREND_ARROW_UP = "↑"
 _TREND_ARROW_DOWN = "↓"
@@ -41,12 +50,13 @@ _TREND_ARROW_SIDEWAYS = "→"
 _TREND_SIDEWAYS_THRESHOLD_PCT = 0.05
 
 
-def _status_emoji(distance_pct: float) -> str:
+def _status_style(distance_pct: float) -> tuple[str, str]:
+    """Return (emoji, color) for the distance-to-SMA thresholds."""
     if distance_pct <= 0:
-        return _STATUS_EMOJI_RED
+        return _STATUS_EMOJI_RED, _STATUS_COLOR_RED
     if distance_pct < 2:
-        return _STATUS_EMOJI_YELLOW
-    return _STATUS_EMOJI_GREEN
+        return _STATUS_EMOJI_YELLOW, _STATUS_COLOR_YELLOW
+    return _STATUS_EMOJI_GREEN, _STATUS_COLOR_GREEN
 
 
 def _trend_arrow(current_price: float, previous_close: float) -> str:
@@ -88,6 +98,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             CONF_NOTIFICATION_ENABLED: False,
             CONF_NOTIFICATION_TIME: DEFAULT_NOTIFICATION_TIME,
             CONF_NOTIFICATION_SERVICE: DEFAULT_NOTIFICATION_SERVICE,
+            CONF_NOTIFICATION_MINIMAL: DEFAULT_NOTIFICATION_MINIMAL,
         }
         hass.config_entries.async_update_entry(entry, options=new_options)
 
@@ -134,9 +145,6 @@ async def _async_send_due_notifications(
     the combined message is only assembled and sent once per time slot,
     instead of once per entry.
     """
-    if dt_util.now().weekday() >= 5:
-        return
-
     sent_key = (dt_util.now().date().isoformat(), notification_at.hour, notification_at.minute)
     sent_today: set[tuple[str, int, int]] = hass.data.setdefault(
         f"{DOMAIN}_notified", set()
@@ -144,6 +152,9 @@ async def _async_send_due_notifications(
     if sent_key in sent_today:
         return
     sent_today.add(sent_key)
+
+    if dt_util.now().weekday() >= 5 and not _DEBUG_IGNORE_WEEKEND:
+        return
 
     blocks_by_service: dict[str, list[str]] = {}
     for config_entry in hass.config_entries.async_entries(DOMAIN):
@@ -181,17 +192,30 @@ async def _async_send_due_notifications(
             continue
 
         data = coordinator.data
-        display_name = config_entry.data.get(CONF_NAME) or data["symbol"]
+        display_name = (
+            config_entry.options.get(CONF_NAME, config_entry.data.get(CONF_NAME)) or data["symbol"]
+        )
         trend = _trend_arrow(data["current_price"], data["previous_close"])
         currency = data.get("currency", "")
-        emoji = _status_emoji(data["distance_pct"])
-        indent = "       "
-        block = (
-            f"{emoji} {display_name}: "
-            f"{data['distance_pct']:+.2f} % {trend}\n"
-            f"{indent}Kurs {data['current_price']:.2f} {currency}\n"
-            f"{indent}SMA{coordinator.sma_period} {data['sma_value']:.2f} {currency}"
+        emoji, color = _status_style(data["distance_pct"])
+        minimal = config_entry.options.get(
+            CONF_NOTIFICATION_MINIMAL,
+            config_entry.data.get(CONF_NOTIFICATION_MINIMAL, DEFAULT_NOTIFICATION_MINIMAL),
         )
+
+        header = (
+            f"{emoji} <b>{display_name}</b>: "
+            f'<b><font color="{color}">{trend} {data["distance_pct"]:+.2f} %</font></b>'
+        )
+        if minimal:
+            block = header
+        else:
+            indent = "       "
+            block = (
+                f"{header}\n"
+                f"{indent}Kurs: {data['current_price']:.2f} {currency}\n"
+                f"{indent}SMA{coordinator.sma_period}: {data['sma_value']:.2f} {currency}"
+            )
         blocks_by_service.setdefault(service, []).append(block)
 
     title = "SMA Tracker Übersicht"
@@ -201,7 +225,11 @@ async def _async_send_due_notifications(
             await hass.services.async_call(
                 domain,
                 service_name,
-                {"message": "\n\n".join(blocks), "title": title},
+                {
+                    "message": "\n\n".join(blocks),
+                    "title": title,
+                    "data": {"html": True},
+                },
                 blocking=True,
             )
         except Exception as err:  # noqa: BLE001
