@@ -29,6 +29,7 @@ env/
 # Local Home Assistant dev instance
 config/
 custom_components/hacs/
+custom_components/ticktick/
 
 # IDE
 .vscode/
@@ -36,6 +37,7 @@ custom_components/hacs/
 *.swp
 *.swo
 *~
+SMA-Tracker.code-workspace
 
 # OS
 .DS_Store

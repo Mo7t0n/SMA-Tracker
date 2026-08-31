@@ -156,7 +156,7 @@ async def _async_send_due_notifications(
     if dt_util.now().weekday() >= 5 and not _DEBUG_IGNORE_WEEKEND:
         return
 
-    blocks_by_service: dict[str, list[str]] = {}
+    blocks_by_service: dict[str, list[tuple[int, str]]] = {}
     for config_entry in hass.config_entries.async_entries(DOMAIN):
         coordinator = hass.data.get(DOMAIN, {}).get(config_entry.entry_id)
         if not isinstance(coordinator, SmaTrackerCoordinator):
@@ -216,17 +216,18 @@ async def _async_send_due_notifications(
                 f"{indent}Kurs: {data['current_price']:.2f} {currency}\n"
                 f"{indent}SMA{coordinator.sma_period}: {data['sma_value']:.2f} {currency}"
             )
-        blocks_by_service.setdefault(service, []).append(block)
+        blocks_by_service.setdefault(service, []).append((coordinator.sma_period, block))
 
     title = "SMA Tracker Übersicht"
     for service, blocks in blocks_by_service.items():
         domain, service_name = service.split(".", 1)
+        sorted_blocks = [block for _, block in sorted(blocks, key=lambda item: item[0])]
         try:
             await hass.services.async_call(
                 domain,
                 service_name,
                 {
-                    "message": "\n\n".join(blocks),
+                    "message": "\n\n".join(sorted_blocks),
                     "title": title,
                     "data": {"html": True},
                 },
