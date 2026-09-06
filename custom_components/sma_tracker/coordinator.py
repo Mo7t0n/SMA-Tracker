@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import YAHOO_CHART_URL, YAHOO_INTERVAL, YAHOO_RANGE
+from .const import YAHOO_CHART_URL, YAHOO_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,6 +23,21 @@ _HEADERS = {
         "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
     )
 }
+
+
+def _select_range(sma_period: int) -> str:
+    """Pick a Yahoo Finance chart range with headroom for sma_period trading days.
+
+    A 2-year range only yields ~500-507 valid trading days depending on the
+    symbol's holiday calendar, which is razor-thin for periods approaching
+    the configured max of 500. Scale the requested range up so there's
+    always a comfortable buffer, regardless of symbol or period.
+    """
+    if sma_period <= 150:
+        return "1y"
+    if sma_period <= 400:
+        return "2y"
+    return "5y"
 
 
 class SmaTrackerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
@@ -48,7 +63,7 @@ class SmaTrackerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         session = async_get_clientsession(self.hass)
         url = YAHOO_CHART_URL.format(symbol=self.symbol)
         params = {
-            "range": YAHOO_RANGE,
+            "range": _select_range(self.sma_period),
             "interval": YAHOO_INTERVAL,
             "includePrePost": "false",
         }

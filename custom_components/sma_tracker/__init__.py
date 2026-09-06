@@ -59,10 +59,16 @@ def _status_style(distance_pct: float) -> tuple[str, str]:
     return _STATUS_EMOJI_GREEN, _STATUS_COLOR_GREEN
 
 
-def _trend_arrow(current_price: float, previous_close: float) -> str:
-    if previous_close == 0:
+def _trend_arrow(current_price: float, reference_price: float) -> str:
+    """Return an arrow comparing current_price to a reference price.
+
+    The reference is normally the price from the last notification actually
+    sent for this tracker, so the arrow reflects the move since then rather
+    than a fixed calendar period.
+    """
+    if reference_price == 0:
         return _TREND_ARROW_SIDEWAYS
-    change_pct = ((current_price - previous_close) / previous_close) * 100
+    change_pct = ((current_price - reference_price) / reference_price) * 100
     if abs(change_pct) < _TREND_SIDEWAYS_THRESHOLD_PCT:
         return _TREND_ARROW_SIDEWAYS
     return _TREND_ARROW_UP if change_pct > 0 else _TREND_ARROW_DOWN
@@ -156,7 +162,9 @@ async def _async_send_due_notifications(
     if dt_util.now().weekday() >= 5 and not _DEBUG_IGNORE_WEEKEND:
         return
 
-    blocks_by_service: dict[str, list[tuple[int, str]]] = {}
+    last_sent_price: dict[str, float] = hass.data.setdefault(f"{DOMAIN}_last_sent_price", {})
+
+    blocks_by_service: dict[str, list[tuple[int, str, str, float]]] = {}
     for config_entry in hass.config_entries.async_entries(DOMAIN):
         coordinator = hass.data.get(DOMAIN, {}).get(config_entry.entry_id)
         if not isinstance(coordinator, SmaTrackerCoordinator):
@@ -195,7 +203,8 @@ async def _async_send_due_notifications(
         display_name = (
             config_entry.options.get(CONF_NAME, config_entry.data.get(CONF_NAME)) or data["symbol"]
         )
-        trend = _trend_arrow(data["current_price"], data["previous_close"])
+        reference_price = last_sent_price.get(config_entry.entry_id, data["previous_close"])
+        trend = _trend_arrow(data["current_price"], reference_price)
         currency = data.get("currency", "")
         emoji, color = _status_style(data["distance_pct"])
         minimal = config_entry.options.get(
@@ -216,18 +225,21 @@ async def _async_send_due_notifications(
                 f"{indent}Kurs: {data['current_price']:.2f} {currency}\n"
                 f"{indent}SMA{coordinator.sma_period}: {data['sma_value']:.2f} {currency}"
             )
-        blocks_by_service.setdefault(service, []).append((coordinator.sma_period, block))
+        blocks_by_service.setdefault(service, []).append(
+            (coordinator.sma_period, block, config_entry.entry_id, data["current_price"])
+        )
 
     title = "SMA Tracker Übersicht"
-    for service, blocks in blocks_by_service.items():
+    for service, items in blocks_by_service.items():
         domain, service_name = service.split(".", 1)
-        sorted_blocks = [block for _, block in sorted(blocks, key=lambda item: item[0])]
+        sorted_items = sorted(items, key=lambda item: item[0])
+        message = "\n\n".join(block for _, block, _, _ in sorted_items)
         try:
             await hass.services.async_call(
                 domain,
                 service_name,
                 {
-                    "message": "\n\n".join(sorted_blocks),
+                    "message": message,
                     "title": title,
                     "data": {"html": True},
                 },
@@ -235,6 +247,9 @@ async def _async_send_due_notifications(
             )
         except Exception as err:  # noqa: BLE001
             _LOGGER.exception("Failed to send daily notification via %s: %s", service, err)
+        else:
+            for _, _, entry_id, current_price in sorted_items:
+                last_sent_price[entry_id] = current_price
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

@@ -24,8 +24,4 @@ ATTR_SMA_PERIOD = "sma_period"
 ATTR_CURRENCY = "currency"
 
 YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
-
-# Range of historical data requested from Yahoo Finance.
-# 2 years of daily candles is enough headroom for SMA periods up to ~500.
-YAHOO_RANGE = "2y"
 YAHOO_INTERVAL = "1d"
