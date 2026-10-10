@@ -4,7 +4,7 @@
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5?style=for-the-badge)](https://hacs.xyz/docs/faq/custom_repositories/)
 [![HACS validation](https://img.shields.io/github/actions/workflow/status/Mo7t0n/SMA-Tracker/validate.yaml?branch=main&label=HACS&style=for-the-badge)](https://github.com/Mo7t0n/SMA-Tracker/actions/workflows/validate.yaml)
 [![hassfest](https://img.shields.io/github/actions/workflow/status/Mo7t0n/SMA-Tracker/hassfest.yml?branch=main&label=hassfest&style=for-the-badge)](https://github.com/Mo7t0n/SMA-Tracker/actions/workflows/hassfest.yml)
-[![License](https://img.shields.io/github/license/Mo7t0n/SMA-Tracker?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/github/license/Mo7t0n/SMA-Tracker?style=for-the-badge&label=license)](LICENSE)
 
 Tracks how far a stock index or security trades above or below its [Simple Moving Average](https://en.wikipedia.org/wiki/Moving_average#Simple_moving_average) (SMA) — e.g. the DAX against its 200-day line — as a `sensor` entity in Home Assistant, with an optional daily summary notification. Market data comes from [Yahoo Finance](https://finance.yahoo.com/); no API key needed.
 
