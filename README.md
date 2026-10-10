@@ -131,4 +131,4 @@ Found a bug or missing a feature? [Open an issue](https://github.com/Mo7t0n/SMA-
 
 ## License
 
-[MIT](LICENSE). Not affiliated with Home Assistant or Yahoo Finance.
+[GPL-3.0](LICENSE). Not affiliated with Home Assistant or Yahoo Finance.
