@@ -14,7 +14,7 @@ body:
     attributes:
       label: Integration version
       description: Shown in HACS, or under Settings → Devices & services → SMA Tracker.
-      placeholder: v0.2.3
+      placeholder: v0.2.4
     validations:
       required: true
   - type: input
