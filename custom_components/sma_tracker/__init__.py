@@ -35,7 +35,7 @@ PLATFORMS = ["sensor"]
 # test the notification flow immediately. Never commit this as True.
 _DEBUG_IGNORE_WEEKEND = False
 
-# Emoji/color thresholds mirror SmaTrackerSensor.rgb_color in sensor.py.
+# Emoji/color thresholds mirror SmaTrackerSensor.icon in sensor.py.
 _STATUS_EMOJI_RED = "\U0001F7E5"
 _STATUS_EMOJI_YELLOW = "\U0001F7E8"
 _STATUS_EMOJI_GREEN = "\U0001F7E9"

@@ -100,7 +100,7 @@ class SmaTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class SmaTrackerOptionsFlow(config_entries.OptionsFlow):
-    """Allow changing the polling interval after setup."""
+    """Allow changing the display name, update interval and notifications after setup."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle the options flow."""

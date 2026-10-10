@@ -80,25 +80,3 @@ class SmaTrackerSensor(CoordinatorEntity[SmaTrackerCoordinator], SensorEntity):
     def available(self) -> bool:
         """Return if entity is available."""
         return self.coordinator.last_update_success
-
-    @property
-    def rgb_color(self) -> tuple[int, int, int] | None:
-        """Return RGB color based on distance percentage.
-        
-        Green: > 2%
-        Yellow: >= 0% and < 2%
-        Red: < 0%
-        """
-        value = self.native_value
-        if value is None:
-            return None
-
-        if value <= 0:
-            # Red: below or equal to 0%
-            return (255, 0, 0)
-        elif value < 2:
-            # Yellow: 0% to 2%
-            return (255, 255, 0)
-        else:
-            # Green: above 2%
-            return (0, 255, 0)
