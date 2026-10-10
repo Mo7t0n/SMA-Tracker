@@ -1,198 +1,134 @@
 # SMA Tracker for Home Assistant
 
-A Home Assistant custom component for tracking the distance between the current price and the Simple Moving Average (SMA) for various stock indices and securities. Data is sourced from Yahoo Finance.
+[![GitHub Release](https://img.shields.io/github/v/release/Mo7t0n/SMA-Tracker?style=for-the-badge&color=%231CB00A)](https://github.com/Mo7t0n/SMA-Tracker/releases)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5?style=for-the-badge)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![HACS validation](https://img.shields.io/github/actions/workflow/status/Mo7t0n/SMA-Tracker/validate.yaml?branch=main&label=HACS&style=for-the-badge)](https://github.com/Mo7t0n/SMA-Tracker/actions/workflows/validate.yaml)
+[![hassfest](https://img.shields.io/github/actions/workflow/status/Mo7t0n/SMA-Tracker/hassfest.yml?branch=main&label=hassfest&style=for-the-badge)](https://github.com/Mo7t0n/SMA-Tracker/actions/workflows/hassfest.yml)
+[![License](https://img.shields.io/github/license/Mo7t0n/SMA-Tracker?style=for-the-badge)](LICENSE)
 
-## Features
+Tracks how far a stock index or security trades above or below its [Simple Moving Average](https://en.wikipedia.org/wiki/Moving_average#Simple_moving_average) (SMA) — e.g. the DAX against its 200-day line — as a `sensor` entity in Home Assistant, with an optional daily summary notification. Market data comes from [Yahoo Finance](https://finance.yahoo.com/); no API key needed.
 
-- **SMA Calculation**: Automatic calculation of Simple Moving Average for configurable periods (2-500 trading days)
-- **Distance Display**: Shows the percentage difference between current price and SMA
-- **Color Coding**: Intelligent color display based on distance:
-  - 🟢 **Green**: > 2% above SMA (well above average)
-  - 🟡 **Yellow**: 0% to < 2% above SMA (close to SMA)
-  - 🔴 **Red**: ≤ 0% (below or equal to SMA)
-- **Yahoo Finance Integration**: Real market data with 2 years of history
-- **Flexible Updates**: Configurable update intervals (5-1440 minutes)
-- **Daily Notifications**: One combined, richly formatted notification per configured time/service, covering all trackers due at that time — not one message per tracker
-- **Multi-Index Support**: Supports any Yahoo Finance symbol
+## Installation
 
-## Supported Symbols
+1. In HACS, open the menu → **Custom repositories**, add `https://github.com/Mo7t0n/SMA-Tracker` with type **Integration**, then download **SMA Tracker** and restart Home Assistant. Or let this button do the adding for you:
 
-Examples of configurable indices and securities:
+   [![Open your Home Assistant instance and open this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Mo7t0n&repository=SMA-Tracker&category=integration)
+2. Add the **SMA Tracker** integration under Settings → Devices & services → **Add integration**, or directly:
 
-- **DAX**: `^GDAXI`
-- **S&P 500**: `^GSPC`
-- **Nasdaq**: `^IXIC`
-- **Dow Jones**: `^DJI`
-- **Euro Stoxx 50**: `^STOXX50E`
-- **Nikkei 225**: `^N225`
-- **Individual Stocks**: e.g., `AAPL`, `MSFT`, `SIEMENS.DE`, etc.
-
-Find more symbols on [Yahoo Finance](https://finance.yahoo.com/).
-
-## Installation Via HACS
-
-1. Open Home Assistant
-2. Go to **HACS** → **Integrations**
-3. Click on **3 dots** and **Custom Repositories** (top right)
-4. Enter the repository URL
-5. Select **Integration** as the category
-6. Click **Download**
-7. Restart Home Assistant
+   [![Open your Home Assistant instance and start setting up SMA Tracker.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=sma_tracker)
+3. Enter a Yahoo Finance symbol and the SMA period. Each symbol/period combination is its own entry — add the integration again to track more.
 
 ## Configuration
 
-### Via UI (recommended)
+| Option | Default | Description |
+| --- | --- | --- |
+| Yahoo Finance symbol | — | e.g. `^GDAXI` for the DAX, see [symbols](#symbols) |
+| Display name | symbol | Name used for the sensor and in notifications |
+| SMA period | `200` | Trading days in the average (2–500) |
+| Update interval | `60` | Minutes between data refreshes (5–1440) |
+| Daily notification | off | Send a summary every weekday (Mon–Fri) |
+| Notification time | `22:00` | When the summary is sent |
+| Notification service | `notify.pushover` | Any Home Assistant `notify.*` service |
+| Minimal notification | off | Only name, percentage and trend arrow — no price/SMA lines |
 
-1. Go to **Settings** → **Devices & Services**
-2. Click **Create Integration**
-3. Search for **SMA Tracker**
-4. Fill in the configuration fields:
-   - **Yahoo Finance Symbol**: e.g., `^GDAXI` for DAX
-   - **Display Name (optional)**: e.g., "DAX SMA200"
-   - **SMA Period**: Number of trading days for SMA calculation (default: 200)
-   - **Update Interval**: How often to update data in minutes (default: 15)
-   - **Daily Notification**: Enable a daily summary notification on trading days
-   - **Notification Time**: Time for the daily notification (default: 22:00)
-   - **Notification Service**: Home Assistant notify service, e.g. `notify.pushover`
-   - **Minimal Notification**: Only show the name, percentage and trend arrow — hides the price/SMA detail lines
+Display name, update interval and all notification options can be changed later under Settings → Devices & services → SMA Tracker → **Configure**. Symbol and SMA period are fixed per entry; to change them, add a new entry.
 
-> Existing configuration entries are automatically updated with the new notification options. Notifications remain disabled by default and can be enabled later in the integration options.
->
-> All of the above — including the display name — can be changed later via **Settings → Devices & Services → SMA Tracker → Configure** on the individual entry.
+### Symbols
 
-### Configuration Examples
+Any symbol listed on [Yahoo Finance](https://finance.yahoo.com/) works, for example:
 
-**DAX with SMA200 (update every 15 minutes)**:
+| Index / security | Symbol |
+| --- | --- |
+| DAX | `^GDAXI` |
+| S&P 500 | `^GSPC` |
+| Nasdaq Composite | `^IXIC` |
+| Dow Jones | `^DJI` |
+| Euro Stoxx 50 | `^STOXX50E` |
+| Nikkei 225 | `^N225` |
+| Single stocks | `AAPL`, `MSFT`, `SIE.DE`, … |
 
-- Symbol: `^GDAXI`
-- Display Name: `DAX`
-- SMA Period: `200`
-- Update Interval: `15`
+## Features
 
-**S&P 500 with SMA50 (update daily)**:
+- **Distance to SMA as a sensor** — `sensor.<name>_sma<period>_distance` holds the percentage the current price is above (positive) or below (negative) the SMA, with these attributes for templates and automations:
 
-- Symbol: `^GSPC`
-- Display Name: `S&P 500`
-- SMA Period: `50`
-- Update Interval: `1440`
+  | Attribute | Content |
+  | --- | --- |
+  | `current_price` | Current market price |
+  | `sma_value` | Current SMA value |
+  | `symbol` | Yahoo Finance symbol |
+  | `sma_period` | Configured SMA period |
+  | `currency` | Currency of the symbol |
 
-## Entities
+- **Status at a glance** — the sensor icon and the notification follow three thresholds:
 
-After configuration, the integration creates the following entities:
+  | Status | Distance | Icon |
+  | --- | --- | --- |
+  | 🟩 Well above | ≥ 2 % | `mdi:arrow-up-bold-circle` |
+  | 🟨 Close to SMA | 0 % to < 2 % | `mdi:arrow-right-bold-circle` |
+  | 🟥 At or below | ≤ 0 % | `mdi:arrow-down-bold-circle` |
 
-### Sensor: `sensor.{name}_sma{period}_distance`
+- **Enough history for any period** — fetches 1, 2 or 5 years of daily closes depending on the SMA period, so even a 500-day SMA has a full window.
+- **One combined daily notification** — all trackers that share a notification time and service are bundled into a single message instead of one per tracker.
 
-**Value**: Percentage difference between current price and SMA
+## Daily notification
 
-**Attributes**:
-
-- `current_price`: Current price
-- `sma_value`: Current SMA value
-- `symbol`: Yahoo Finance symbol
-- `sma_period`: Configured SMA period
-- `currency`: Currency of the index
-
-**Colors (RGB)**:
-
-- Green: `(0, 255, 0)` for values > 2%
-- Yellow: `(255, 255, 0)` for values 0% to < 2%
-- Red: `(255, 0, 0)` for values ≤ 0%
-
-## Automation Examples
-
-### Daily Notification (optional)
-
-If you want a daily summary by notification service instead of automation, enable the daily notification option in the integration config. The integration sends the notification on trading days at the configured time.
-
-If several trackers share the same notification time and service, they are combined into a **single** message instead of one notification per tracker. Example (as rendered by Pushover, which supports basic HTML):
+The summary is titled *SMA Tracker Übersicht*, sorted by SMA period, and looks like this (as rendered by Pushover):
 
 ```text
 🟩 DAX: ↑ +2.34 %
-    Kurs: 18420.10 EUR
-    SMA200: 18004.55 EUR
+       Kurs: 18420.10 EUR
+       SMA200: 18004.55 EUR
 
 🟥 S&P 500: ↓ -0.85 %
-    Kurs: 5320.12 USD
-    SMA200: 5365.90 USD
+       Kurs: 5320.12 USD
+       SMA200: 5365.90 USD
 ```
 
-- 🟥/🟨/🟩 mark the same red/yellow/green thresholds as the sensor color coding
-- The trend arrow (↑/↓/→) compares the current price to the previous trading day's close
-- Name, percentage and arrow are sent in **bold**, with the percentage/arrow colored to match the status square
-- **Minimal Notification** (see above) drops the `Kurs`/`SMA` lines and keeps just the first line
+- The square uses the thresholds above; name, percentage and arrow are bold, the percentage colored to match.
+- The arrow (↑ / ↓ / →) compares the price with the one in the last notification sent for that tracker — the previous close for the first one after a restart. Moves under 0.05 % show as →.
+- **Minimal notification** keeps only the first line per tracker.
+- Formatting relies on HTML (`data: {html: true}`, sent automatically), which Pushover supports. Other notify services may ignore it or show the `<b>`/`<font>` tags as plain text.
+- No notification on Saturdays and Sundays. To test on a weekend, set `_DEBUG_IGNORE_WEEKEND = True` in `__init__.py` locally — don't commit it.
 
-> The bold/color formatting relies on Pushover's HTML support (`data: {html: true}`, sent automatically). Other notify services typically ignore the `html` field; if they don't render HTML, the `<b>`/`<font>` tags may show up as literal text.
+## Examples
 
-Notifications are skipped on Saturday and Sunday, since markets are closed. To test the notification flow on a weekend, flip `_DEBUG_IGNORE_WEEKEND` to `True` near the top of `__init__.py` — this is a code-only debug switch, not a UI option, and should not be left enabled.
-
-### Notification When SMA is Breached
+Notify when the DAX falls below its 200-day line:
 
 ```yaml
 automation:
-  - alias: "DAX breaches SMA"
-    trigger:
-      platform: numeric_state
-      entity_id: sensor.dax_sma200_distance
-      below: 0
-    action:
-      service: notify.notify
-      data:
-        message: "DAX has fallen below the SMA200!"
+  - alias: "DAX below SMA200"
+    triggers:
+      - trigger: numeric_state
+        entity_id: sensor.dax_sma200_distance
+        below: 0
+    actions:
+      - action: notify.notify
+        data:
+          message: "DAX has fallen below its SMA200 ({{ states('sensor.dax_sma200_distance') }} %)."
 ```
 
-### Lovelace Card
+Show several trackers on a dashboard:
 
 ```yaml
 type: entities
+title: Markets vs. SMA
 entities:
   - entity: sensor.dax_sma200_distance
-    name: DAX SMA200 Distance
+  - entity: sensor.s_p_500_sma200_distance
 ```
 
 ## Troubleshooting
 
-### Error: "Not enough historical data"
-
-The integration couldn't retrieve enough historical data from Yahoo Finance. This can happen if:
-
-- The symbol doesn't exist
-- Yahoo Finance doesn't have 2 years of data for this symbol
-
-**Solution**: Check the Yahoo Finance symbol and consider reducing the SMA period.
-
-### Error: "HTTP 404"
-
-The symbol doesn't exist or is invalid.
-
-**Solution**: Verify the symbol on [Yahoo Finance](https://finance.yahoo.com/).
-
-### Integration Not Loading
-
-- Check the logs in Home Assistant
-- Restart Home Assistant
-
-## Frequently Asked Questions
-
-**Q: Why do you use Yahoo Finance?**
-A: Yahoo Finance provides free, reliable data for indices and individual stocks without requiring an API key.
-
-**Q: Can I track multiple indices at the same time?**
-A: Yes! You can create multiple configuration entries, one for each index.
-
-**Q: How accurate is the SMA calculation?**
-A: Very accurate - it's calculated using 2 years of daily data.
-
-**Q: Can I change the SMA period?**
-A: Yes, but you need to create a new configuration entry. Each combination of symbol and SMA period is unique.
-
-## License
-
-MIT License - See LICENSE file for details
+| Problem | Cause and fix |
+| --- | --- |
+| *Not enough historical data* | Yahoo Finance has fewer daily closes for the symbol than the SMA period needs (e.g. a recent IPO). Use a shorter period. |
+| *HTTP 404* | The symbol doesn't exist. Check the exact spelling on [Yahoo Finance](https://finance.yahoo.com/), including prefixes like `^` and suffixes like `.DE`. |
+| No notification | Check that the notify service exists (Developer tools → Actions) and that it is a weekday. Failures are logged under Settings → System → Logs. |
 
 ## Support
 
-For issues, questions, or feature requests, please open an issue on GitHub.
+Found a bug or missing a feature? [Open an issue](https://github.com/Mo7t0n/SMA-Tracker/issues/new/choose).
 
----
+## License
 
-**Note**: This integration is a community project and is not supported by Home Assistant or Yahoo Finance.
+[MIT](LICENSE). Not affiliated with Home Assistant or Yahoo Finance.
