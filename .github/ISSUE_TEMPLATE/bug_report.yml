@@ -33,6 +33,7 @@ body:
         - Setup / options (config flow)
         - Sensor value or attributes
         - Daily notification
+        - Buy/sell signal
         - Other
     validations:
       required: true

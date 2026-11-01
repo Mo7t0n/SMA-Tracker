@@ -6,7 +6,7 @@
 [![hassfest](https://img.shields.io/github/actions/workflow/status/Mo7t0n/SMA-Tracker/hassfest.yml?branch=main&label=hassfest&style=for-the-badge)](https://github.com/Mo7t0n/SMA-Tracker/actions/workflows/hassfest.yml)
 [![License](https://img.shields.io/github/license/Mo7t0n/SMA-Tracker?style=for-the-badge&label=license)](LICENSE)
 
-Tracks how far a stock index or security trades above or below its [Simple Moving Average](https://en.wikipedia.org/wiki/Moving_average#Simple_moving_average) (SMA) — e.g. the DAX against its 200-day line — as a `sensor` entity in Home Assistant, with an optional daily summary notification. Market data comes from [Yahoo Finance](https://finance.yahoo.com/); no API key needed.
+Tracks how far a stock index or security trades above or below its [Simple Moving Average](https://en.wikipedia.org/wiki/Moving_average#Simple_moving_average) (SMA) — e.g. the DAX against its 200-day line — as a `sensor` entity in Home Assistant, with optional notifications: a daily summary and an instant buy/sell signal when the price crosses the SMA. Market data comes from [Yahoo Finance](https://finance.yahoo.com/); no API key needed.
 
 ## Installation
 
@@ -26,7 +26,7 @@ Tracks how far a stock index or security trades above or below its [Simple Movin
 | Display name | symbol | Name used for the sensor and in notifications |
 | SMA period | `200` | Trading days in the average (2–500) |
 | Update interval | `60` | Minutes between data refreshes (5–1440) |
-| Daily notification | off | Send a summary every weekday (Mon–Fri) |
+| Notifications | off | Send a summary every weekday (Mon–Fri) and a [buy/sell signal](#buysell-signal) when the price crosses the SMA |
 | Notification time | `22:00` | When the summary is sent |
 | Notification service | `notify.pushover` | Any Home Assistant `notify.*` service |
 | Minimal notification | off | Only name, percentage and trend arrow — no price/SMA lines |
@@ -69,6 +69,7 @@ Any symbol listed on [Yahoo Finance](https://finance.yahoo.com/) works, for exam
 
 - **Enough history for any period** — fetches 1, 2 or 5 years of daily closes depending on the SMA period, so even a 500-day SMA has a full window.
 - **One combined daily notification** — all trackers that share a notification time and service are bundled into a single message instead of one per tracker.
+- **Buy/sell signal** — an immediate notification as soon as the price crosses the SMA in either direction.
 
 ## Daily notification
 
@@ -85,26 +86,48 @@ The summary is titled *SMA Tracker Übersicht*, sorted by SMA period, and looks 
 ```
 
 - The square uses the thresholds above; name, percentage and arrow are bold, the percentage colored to match.
-- The arrow (↑ / ↓ / →) compares the price with the one in the last notification sent for that tracker — the previous close for the first one after a restart. Moves under 0.05 % show as →.
+- The arrow (↑ / ↓ / →) compares the price with the one in the last summary sent for that tracker — the previous close for the first one after a restart. Moves under 0.05 % show as →.
 - **Minimal notification** keeps only the first line per tracker.
 - Formatting relies on HTML (`data: {html: true}`, sent automatically), which Pushover supports. Other notify services may ignore it or show the `<b>`/`<font>` tags as plain text.
 - No notification on Saturdays and Sundays. To test on a weekend, set `_DEBUG_IGNORE_WEEKEND = True` in `__init__.py` locally — don't commit it.
 
+## Buy/sell signal
+
+With notifications enabled, each tracker also sends its own message right after the update in which the distance to the SMA changes sign — via the same notification service, independent of the notification time:
+
+```text
+SMA Tracker Verkaufssignal
+🟥 DAX auf/unter SMA200 gefallen: -0.12 %
+       Kurs: 17982.40 EUR
+       SMA200: 18004.55 EUR
+
+SMA Tracker Kaufsignal
+🟩 DAX über SMA200 gestiegen: +0.08 %
+       Kurs: 18018.95 EUR
+       SMA200: 18004.55 EUR
+```
+
+- **Sell signal** when the distance falls from above 0 % to 0 % or below, **buy signal** when it rises from 0 % or below to above 0 % — the same threshold as the 🟥 status.
+- Checked on every data refresh, so the signal arrives at most one update interval after the cross. Weekends are not skipped, since crypto symbols trade then too.
+- The last side is saved across restarts: a cross that happened while Home Assistant was down is reported once startup has finished. The very first update of a new tracker only sets the baseline and sends nothing.
+- If the price keeps hovering around the SMA, every cross triggers a new signal.
+- **Minimal notification** keeps only the first line.
+
 ## Examples
 
-Notify when the DAX falls below its 200-day line:
+The built-in [buy/sell signal](#buysell-signal) covers the cross itself. For other thresholds, use an automation — e.g. notify when the DAX falls more than 5 % below its 200-day line:
 
 ```yaml
 automation:
-  - alias: "DAX below SMA200"
+  - alias: "DAX 5 % below SMA200"
     triggers:
       - trigger: numeric_state
         entity_id: sensor.dax_sma200_distance
-        below: 0
+        below: -5
     actions:
       - action: notify.notify
         data:
-          message: "DAX has fallen below its SMA200 ({{ states('sensor.dax_sma200_distance') }} %)."
+          message: "DAX is more than 5 % below its SMA200 ({{ states('sensor.dax_sma200_distance') }} %)."
 ```
 
 Show several trackers on a dashboard:
@@ -123,7 +146,7 @@ entities:
 | --- | --- |
 | *Not enough historical data* | Yahoo Finance has fewer daily closes for the symbol than the SMA period needs (e.g. a recent IPO). Use a shorter period. |
 | *HTTP 404* | The symbol doesn't exist. Check the exact spelling on [Yahoo Finance](https://finance.yahoo.com/), including prefixes like `^` and suffixes like `.DE`. |
-| No notification | Check that the notify service exists (Developer tools → Actions) and that it is a weekday. Failures are logged under Settings → System → Logs. |
+| No notification | Check that the notify service exists (Developer tools → Actions). The daily summary is only sent on weekdays; a buy/sell signal only after the distance changes sign, not for the first reading of a new tracker. Failures are logged under Settings → System → Logs. |
 
 ## Support
 
