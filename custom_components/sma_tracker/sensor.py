@@ -4,6 +4,7 @@ from __future__ import annotations
 from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -14,7 +15,6 @@ from .const import (
     ATTR_SMA_VALUE,
     ATTR_SYMBOL,
     CONF_NAME,
-    CONF_SMA_PERIOD,
     CONF_SYMBOL,
     DOMAIN,
 )
@@ -26,7 +26,15 @@ async def async_setup_entry(
 ) -> None:
     """Set up the SMA Tracker sensor from a config entry."""
     coordinator: SmaTrackerCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([SmaTrackerSensor(coordinator, entry)])
+    sensor = SmaTrackerSensor(coordinator, entry)
+
+    # Changing the SMA period creates a new sensor; drop the one for the old period.
+    entity_registry = er.async_get(hass)
+    for entity_entry in er.async_entries_for_config_entry(entity_registry, entry.entry_id):
+        if entity_entry.unique_id != sensor.unique_id:
+            entity_registry.async_remove(entity_entry.entity_id)
+
+    async_add_entities([sensor])
 
 
 class SmaTrackerSensor(CoordinatorEntity[SmaTrackerCoordinator], SensorEntity):
@@ -40,7 +48,7 @@ class SmaTrackerSensor(CoordinatorEntity[SmaTrackerCoordinator], SensorEntity):
         super().__init__(coordinator)
         self._entry = entry
         symbol = entry.data[CONF_SYMBOL]
-        sma_period = entry.data[CONF_SMA_PERIOD]
+        sma_period = coordinator.sma_period
         display_name = entry.options.get(CONF_NAME, entry.data.get(CONF_NAME)) or symbol
 
         self._attr_name = f"{display_name} SMA{sma_period} Distance"
@@ -61,7 +69,7 @@ class SmaTrackerSensor(CoordinatorEntity[SmaTrackerCoordinator], SensorEntity):
             ATTR_CURRENT_PRICE: data["current_price"],
             ATTR_SMA_VALUE: data["sma_value"],
             ATTR_SYMBOL: data["symbol"],
-            ATTR_SMA_PERIOD: self._entry.data[CONF_SMA_PERIOD],
+            ATTR_SMA_PERIOD: self.coordinator.sma_period,
             ATTR_CURRENCY: data.get("currency"),
         }
 

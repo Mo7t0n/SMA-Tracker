@@ -26,13 +26,20 @@
         "title": "SMA Tracker Optionen",
         "data": {
           "name": "Anzeigename (optional)",
+          "sma_period": "SMA-Zeitraum (Handelstage)",
           "scan_interval": "Aktualisierungsintervall (Minuten)",
           "notification_enabled": "Benachrichtigungen aktivieren (Tagesübersicht und Kauf-/Verkaufssignal bei SMA-Kreuzung)",
           "notification_time": "Benachrichtigungszeit",
           "notification_service": "Benachrichtigungsdienst",
           "notification_minimal": "Minimal-Benachrichtigung (Kurs und SMA-Wert ausblenden)"
+        },
+        "data_description": {
+          "sma_period": "Eine Änderung ersetzt den Sensor durch einen neuen für den neuen Zeitraum."
         }
       }
+    },
+    "error": {
+      "already_configured": "Dieses Symbol mit diesem SMA-Zeitraum ist bereits konfiguriert."
     }
   }
 }

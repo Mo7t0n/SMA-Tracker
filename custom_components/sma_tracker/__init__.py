@@ -107,7 +107,7 @@ def _parse_notification_time(notification_time: str | dt_time) -> dt_time:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up SMA Tracker from a config entry."""
     symbol = entry.data[CONF_SYMBOL]
-    sma_period = entry.data[CONF_SMA_PERIOD]
+    sma_period = entry.options.get(CONF_SMA_PERIOD, entry.data[CONF_SMA_PERIOD])
     scan_interval = entry.options.get(
         CONF_SCAN_INTERVAL, entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     )
@@ -158,14 +158,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
             entry.async_on_unload(cancel)
 
-    # Kept in memory across reloads, so an options change right after a cross
-    # can't read a store write that hasn't been flushed yet.
-    above_sma: dict[str, bool] = hass.data.setdefault(f"{DOMAIN}_above_sma", {})
+    # entry_id -> (sma_period, above). Kept in memory across reloads, so an
+    # options change right after a cross can't read a store write that hasn't
+    # been flushed yet.
+    sma_side: dict[str, tuple[int, bool]] = hass.data.setdefault(f"{DOMAIN}_sma_side", {})
     side_store = _sma_side_store(hass, entry.entry_id)
-    if entry.entry_id not in above_sma:
+    if entry.entry_id not in sma_side:
         stored_side = await side_store.async_load()
         if stored_side and "above" in stored_side:
-            above_sma[entry.entry_id] = stored_side["above"]
+            # Stores from before the period could be changed don't record it.
+            sma_side[entry.entry_id] = (
+                stored_side.get("sma_period", sma_period),
+                stored_side["above"],
+            )
 
     @callback
     def _async_check_sma_cross() -> None:
@@ -178,13 +183,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             return
         # Same threshold as the red status: reaching 0 % counts as below.
         above = coordinator.data["distance_pct"] > 0
-        previous = above_sma.get(entry.entry_id)
-        if above == previous:
+        previous = sma_side.get(entry.entry_id)
+        if previous == (sma_period, above):
             return
-        above_sma[entry.entry_id] = above
-        side_store.async_delay_save(lambda: {"above": above})
-        if previous is None:
-            # First reading for this entry, nothing to compare against.
+        sma_side[entry.entry_id] = (sma_period, above)
+        side_store.async_delay_save(lambda: {"above": above, "sma_period": sma_period})
+        if previous is None or previous[0] != sma_period:
+            # First reading for this entry or its new SMA period: the side
+            # relative to another SMA is no crossing.
             return
         hass.async_create_task(
             _async_send_sma_cross_notification(hass, entry, coordinator, above)
@@ -381,7 +387,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Delete the stored SMA side when the entry is removed."""
-    hass.data.get(f"{DOMAIN}_above_sma", {}).pop(entry.entry_id, None)
+    hass.data.get(f"{DOMAIN}_sma_side", {}).pop(entry.entry_id, None)
     await _sma_side_store(hass, entry.entry_id).async_remove()
 
 

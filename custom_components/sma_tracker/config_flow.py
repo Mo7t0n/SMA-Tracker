@@ -100,20 +100,32 @@ class SmaTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class SmaTrackerOptionsFlow(config_entries.OptionsFlow):
-    """Allow changing the display name, update interval and notifications after setup."""
+    """Allow changing the display name, SMA period, update interval and notifications after setup."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle the options flow."""
+        errors: dict[str, str] = {}
+
         if user_input is not None:
             symbol = self.config_entry.data[CONF_SYMBOL]
-            new_name = user_input.get(CONF_NAME, "").strip()
-            self.hass.config_entries.async_update_entry(
-                self.config_entry, title=new_name or symbol
+            unique_id = f"{symbol}_{user_input[CONF_SMA_PERIOD]}"
+            existing_entry = self.hass.config_entries.async_entry_for_domain_unique_id(
+                DOMAIN, unique_id
             )
-            return self.async_create_entry(title="", data=user_input)
+            if existing_entry and existing_entry.entry_id != self.config_entry.entry_id:
+                errors[CONF_SMA_PERIOD] = "already_configured"
+            else:
+                new_name = user_input.get(CONF_NAME, "").strip()
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry, title=new_name or symbol, unique_id=unique_id
+                )
+                return self.async_create_entry(title="", data=user_input)
 
         current_name = self.config_entry.options.get(
             CONF_NAME, self.config_entry.data.get(CONF_NAME, "")
+        )
+        current_sma_period = self.config_entry.options.get(
+            CONF_SMA_PERIOD, self.config_entry.data[CONF_SMA_PERIOD]
         )
         current_interval = self.config_entry.options.get(
             CONF_SCAN_INTERVAL,
@@ -144,6 +156,10 @@ class SmaTrackerOptionsFlow(config_entries.OptionsFlow):
             {
                 vol.Optional(CONF_NAME, default=current_name): str,
                 vol.Required(
+                    CONF_SMA_PERIOD,
+                    default=current_sma_period,
+                ): vol.All(vol.Coerce(int), vol.Range(min=2, max=500)),
+                vol.Required(
                     CONF_SCAN_INTERVAL,
                     default=current_interval,
                 ): vol.All(vol.Coerce(int), vol.Range(min=5, max=1440)),
@@ -166,4 +182,9 @@ class SmaTrackerOptionsFlow(config_entries.OptionsFlow):
             }
         )
 
-        return self.async_show_form(step_id="init", data_schema=options_schema)
+        return self.async_show_form(
+            step_id="init",
+            # Keep what the user entered when the form is shown again with an error.
+            data_schema=self.add_suggested_values_to_schema(options_schema, user_input),
+            errors=errors,
+        )

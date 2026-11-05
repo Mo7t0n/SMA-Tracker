@@ -31,7 +31,7 @@ Tracks how far a stock index or security trades above or below its [Simple Movin
 | Notification service | `notify.pushover` | Any Home Assistant `notify.*` service |
 | Minimal notification | off | Only name, percentage and trend arrow — no price/SMA lines |
 
-Display name, update interval and all notification options can be changed later under Settings → Devices & services → SMA Tracker → **Configure**. Symbol and SMA period are fixed per entry; to change them, add a new entry.
+Everything except the symbol can be changed later under Settings → Devices & services → SMA Tracker → **Configure**; to track another symbol, add a new entry. Changing the SMA period replaces the sensor with a new one named after the new period (e.g. `sensor.dax_sma50_distance` instead of `sensor.dax_sma200_distance`), so update automations and dashboards that use the old one.
 
 ### Symbols
 
@@ -109,7 +109,7 @@ SMA Tracker Kaufsignal
 
 - **Sell signal** when the distance falls from above 0 % to 0 % or below, **buy signal** when it rises from 0 % or below to above 0 % — the same threshold as the 🟥 status.
 - Checked on every data refresh, so the signal arrives at most one update interval after the cross. Weekends are not skipped, since crypto symbols trade then too.
-- The last side is saved across restarts: a cross that happened while Home Assistant was down is reported once startup has finished. The very first update of a new tracker only sets the baseline and sends nothing.
+- The last side is saved across restarts: a cross that happened while Home Assistant was down is reported once startup has finished. The very first update of a new tracker, or after changing its SMA period, only sets the baseline and sends nothing.
 - If the price keeps hovering around the SMA, every cross triggers a new signal.
 - **Minimal notification** keeps only the first line.
 
@@ -146,7 +146,7 @@ entities:
 | --- | --- |
 | *Not enough historical data* | Yahoo Finance has fewer daily closes for the symbol than the SMA period needs (e.g. a recent IPO). Use a shorter period. |
 | *HTTP 404* | The symbol doesn't exist. Check the exact spelling on [Yahoo Finance](https://finance.yahoo.com/), including prefixes like `^` and suffixes like `.DE`. |
-| No notification | Check that the notify service exists (Developer tools → Actions). The daily summary is only sent on weekdays; a buy/sell signal only after the distance changes sign, not for the first reading of a new tracker. Failures are logged under Settings → System → Logs. |
+| No notification | Check that the notify service exists (Developer tools → Actions). The daily summary is only sent on weekdays; a buy/sell signal only after the distance changes sign, not for the first reading of a new tracker or after an SMA period change. Failures are logged under Settings → System → Logs. |
 
 ## Support
 

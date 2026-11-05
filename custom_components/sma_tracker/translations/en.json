@@ -26,13 +26,20 @@
         "title": "SMA Tracker options",
         "data": {
           "name": "Display name (optional)",
+          "sma_period": "SMA period (trading days)",
           "scan_interval": "Update interval (minutes)",
           "notification_enabled": "Enable notifications (daily summary and buy/sell signal on SMA cross)",
           "notification_time": "Notification time",
           "notification_service": "Notification service",
           "notification_minimal": "Minimal notification (hide price and SMA value)"
+        },
+        "data_description": {
+          "sma_period": "Changing it replaces the sensor with a new one for the new period."
         }
       }
+    },
+    "error": {
+      "already_configured": "This symbol and SMA period is already configured."
     }
   }
 }
