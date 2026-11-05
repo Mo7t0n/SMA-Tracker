@@ -99,8 +99,13 @@ class SmaTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return SmaTrackerOptionsFlow()
 
 
-class SmaTrackerOptionsFlow(config_entries.OptionsFlow):
-    """Allow changing the display name, SMA period, update interval and notifications after setup."""
+class SmaTrackerOptionsFlow(config_entries.OptionsFlowWithReload):
+    """Allow changing the display name, SMA period, update interval and notifications after setup.
+
+    Home Assistant reloads the entry once the new options are saved. An update
+    listener would already reload on the title change below and could set the
+    entry up with the old options.
+    """
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle the options flow."""
